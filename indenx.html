@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RhythmGame - 7 Keys</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main class="game">
+
+    <!-- 曲選択画面 -->
+    <section id="songSelectScreen" class="screen">
+      <header class="game-header">
+        <div>
+          <p class="eyebrow">BROWSER RHYTHM GAME</p>
+          <h1>SELECT MUSIC</h1>
+        </div>
+      </header>
+
+      <p class="screen-description">
+        プレイする曲を選択してください。
+      </p>
+
+      <div id="songList" class="song-list">
+        <!-- 曲一覧はgame.jsから生成 -->
+      </div>
+    </section>
+
+    <!-- ゲーム画面 -->
+    <section id="gameScreen" class="screen" hidden>
+      <header class="game-header">
+        <div>
+          <p class="eyebrow">BROWSER RHYTHM GAME</p>
+          <h1>RHYTHM GAME</h1>
+          <p id="currentSongTitle" class="current-song-title"></p>
+        </div>
+        <div class="score-panel">
+          <span>SCORE</span>
+          <strong id="score">000000</strong>
+        </div>
+      </header>
+
+
+      <section class="game-info">
+            <span id="status">READY</span>
+            <span>COMBO <strong id="combo">0</strong></span>
+            <span>MISS <strong id="missCount">0</strong></span>
+            <span>ACCURACY <strong id="playAccuracy">0.00%</strong></span>
+            <span>7 KEYS</span>
+      </section>
+
+
+      <section class="playfield" id="playfield"
+        aria-label="7鍵盤のゲーム画面">
+        <div class="lanes" id="lanes"></div>
+        <div class="judgment-line"></div>
+        <div class="hit-flash" id="hitFlash"></div>
+        <div id="judgmentPopup" class="judgment-popup" aria-live="polite"></div>
+        <div class="lane-labels" id="laneLabels"></div>
+      </section>
+
+      <section class="controls">
+        <button id="startButton" type="button">ゲーム開始</button>
+        <button id="backButton" type="button">曲選択に戻る</button>
+        <p>キーボード：D F G Space J K L</p>
+        <p>スマホ：画面下の7レーンをタップ</p>
+      </section>
+
+      <div class="volume-control">
+        <label for="volumeSlider">音量</label>
+        <input
+          type="range"
+          id="volumeSlider"
+          min="0"
+          max="100"
+          value="15"
+        >
+        <span id="volumeValue">15%</span>
+      </div>
+    </section>
+
+    
+    <!-- リザルト画面 -->
+    <section id="resultScreen" class="screen" hidden>
+    <header class="game-header">
+        <div>
+        <p class="eyebrow">BROWSER RHYTHM GAME</p>
+        <h1>RESULT</h1>
+        <p id="resultSongTitle" class="current-song-title"></p>
+        </div>
+    </header>
+
+    <div class="result-score">
+        <span>SCORE</span>
+        <strong id="resultScore">000000</strong>
+    </div>
+
+    <div class="result-stats">
+        <div class="result-stat">
+        <span>MAX COMBO</span>
+        <strong id="resultMaxCombo">0</strong>
+        </div>
+        <div class="result-stat">
+        <span>MISS</span>
+        <strong id="resultMiss">0</strong>
+        </div>
+        <p class="result-stat">
+        正確度
+        <span id="resultAccuracy">0.00%</span>
+        </p>
+    </div>
+
+    <div class="result-judgments">
+        <div>
+        <span>PERFECT</span>
+        <strong id="resultPerfect">0</strong>
+        </div>
+        <div>
+        <span>GREAT</span>
+        <strong id="resultGreat">0</strong>
+        </div>
+        <div>
+        <span>MISS</span>
+        <strong id="resultMissCount">0</strong>
+        </div>
+    </div>
+
+    <section class="controls">
+        <button id="retryButton" type="button">もう一度プレイ</button>
+        <button id="resultBackButton" type="button">曲選択に戻る</button>
+    </section>
+    </section>
+
+
+  </main>
+</body>
+</html>

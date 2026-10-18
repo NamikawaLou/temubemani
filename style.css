@@ -1,0 +1,448 @@
+
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: "Segoe UI", sans-serif;
+  background: #10131b;
+  color: #f5f7ff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, #202b45 0%, #10131b 65%);
+}
+
+button {
+  font: inherit;
+}
+
+.game {
+  width: min(100%, 650px);
+  margin: 0 auto;
+  padding: 20px 14px 28px;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow {
+  color: #7e9cff;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+h1 {
+  margin: 4px 0;
+  font-size: clamp(20px, 5vw, 30px);
+  letter-spacing: 2px;
+}
+
+.score-panel {
+  text-align: right;
+}
+
+.score-panel span {
+  display: block;
+  color: #9aa8c7;
+  font-size: 11px;
+}
+
+.score-panel strong {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-info {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0 8px;
+  color: #aebbd7;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+#status {
+  color: #75e5c2;
+}
+
+.playfield {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr 66px;
+  height: min(62vh, 560px);
+  min-height: 380px;
+  overflow: hidden;
+  border: 1px solid #35415d;
+  border-radius: 8px;
+  background: #090c13;
+  isolation: isolate;
+}
+
+.lanes {
+  position: absolute;
+  inset: 0 0 66px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.lane {
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid #30394e;
+  background: linear-gradient(#141b2a, #101522);
+  padding: 0;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lane:nth-child(even) {
+  background: linear-gradient(#1a2234, #141a29);
+}
+
+.lane:last-child {
+  border-right: 0;
+}
+
+.lane.active {
+  background: #344b70;
+}
+
+.note {
+  position: absolute;
+  left: 7%;
+  width: 86%;
+  height: 13px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #b9f9ff, #58b9ff);
+  box-shadow: 0 0 12px #50baff88;
+  pointer-events: none;
+}
+
+.judgment-line {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 66px;
+  height: 3px;
+  background: #8ceaff;
+  box-shadow: 0 0 12px #65dfff;
+  pointer-events: none;
+}
+
+.hit-flash {
+  position: absolute;
+  z-index: 3;
+  bottom: 66px;
+  left: 0;
+  right: 0;
+  height: 0;
+  background: #8ceaff66;
+  pointer-events: none;
+}
+
+.lane-labels {
+  position: absolute;
+  z-index: 4;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 66px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: #080a10;
+}
+
+.lane-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #3b4862;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  color: #f4f7ff;
+  font-size: clamp(12px, 3.2vw, 17px);
+  font-weight: 700;
+  user-select: none;
+  touch-action: none;
+}
+
+.lane-key.pressed {
+  color: #09111c;
+  background: #8ceaff;
+}
+
+.controls {
+  text-align: center;
+  margin-top: 18px;
+}
+
+#startButton {
+  width: min(100%, 320px);
+  padding: 14px 20px;
+  border: 0;
+  border-radius: 8px;
+  color: #07121d;
+  background: #8ceaff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#startButton:active {
+  transform: scale(0.98);
+}
+
+.controls p {
+  margin: 10px 0;
+  color: #aab5ce;
+  font-size: 12px;
+}
+
+@media (max-width: 420px) {
+  .game {
+    padding: 14px 8px 20px;
+  }
+
+  .playfield {
+    height: 58vh;
+    min-height: 340px;
+  }
+
+  .lane-key {
+    font-size: 12px;
+  }
+}
+
+
+/* 画面切り替え */
+.screen[hidden] {
+  display: none !important;
+}
+
+.screen-description {
+  color: #aebbd0;
+  margin: 12px 0 20px;
+}
+
+.current-song-title {
+  color: #aebbd0;
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+/* 曲一覧 */
+.song-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.song-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 18px;
+  color: inherit;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.song-card:hover,
+.song-card:focus-visible {
+  background: rgba(90, 150, 255, 0.14);
+  border-color: #6da5ff;
+  outline: none;
+}
+
+.song-card:active {
+  transform: scale(0.99);
+}
+
+.song-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.song-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.song-card-detail {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.song-card-play {
+  font-size: 1.5rem;
+  color: #6da5ff;
+}
+
+#backButton {
+  margin-left: 8px;
+}
+
+@media (max-width: 480px) {
+  .song-card {
+    padding: 15px;
+  }
+
+  #backButton {
+    margin: 8px 0 0;
+  }
+}
+
+
+/* コンボ・ミス表示 */
+.game-info strong {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin-left: 4px;
+}
+
+/* リザルト画面 */
+.result-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0;
+}
+
+.result-score span,
+.result-stat span {
+  color: #aebbd0;
+  font-size: 0.85rem;
+}
+
+.result-score strong {
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  letter-spacing: 0.08em;
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.result-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+}
+
+.result-stat strong {
+  font-size: 1.8rem;
+}
+
+.result-judgments {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+
+.result-judgments > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-judgments > div:nth-child(1) span {
+  color: #93c5fd;
+}
+
+.result-judgments > div:nth-child(2) span {
+  color: #86efac;
+}
+
+.result-judgments > div:nth-child(3) span {
+  color: #fca5a5;
+}
+
+
+/* 判定表示の基本設定 */
+.judgment-popup {
+  position: absolute;
+  z-index: 10;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, 10px) scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: clamp(1.6rem, 6vw, 2.8rem);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-shadow: 0 0 12px currentColor;
+}
+
+/* 判定が出るときのアニメーション */
+.judgment-popup.show {
+  animation: judgment-appear 0.55s ease-out forwards;
+}
+
+/* PERFECT */
+.judgment-popup.judgment-perfect {
+  color: #8be9ff;
+}
+
+/* GREAT */
+.judgment-popup.judgment-great {
+  color: #8dffb0;
+}
+
+/* MISS */
+.judgment-popup.judgment-miss {
+  color: #ff7272;
+}
+
+@keyframes judgment-appear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.8);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.15);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(1);
+  }
+}
+
