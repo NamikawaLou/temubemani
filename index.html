@@ -62,10 +62,31 @@
         <div class="lane-labels" id="laneLabels"></div>
       </section>
 
+      <!-- GROOVE GAUGE・SCOREパネル -->
+      <section class="iidx-panel" aria-label="ゲージとスコア">
+        <div class="gauge-row">
+          <span class="gauge-label">GROOVE GAUGE</span>
+          <div class="gauge-bar" id="gaugeBar">
+            <div class="gauge-fill"></div>
+          </div>
+          <strong class="gauge-value"><span id="gaugeValue">22</span>%</strong>
+        </div>
+        <div class="panel-row">
+          <div class="digital-box">
+            <span>SCORE</span>
+            <strong id="panelScore">000000</strong>
+          </div>
+          <div class="digital-box">
+            <span>MAX COMBO</span>
+            <strong id="panelMaxCombo">0</strong>
+          </div>
+        </div>
+      </section>
+
       <section class="controls">
         <button id="startButton" type="button">ゲーム開始</button>
         <button id="backButton" type="button">曲選択に戻る</button>
-        <p>キーボード：Space H J K L</p>
+        <p>キーボード：G H J K L</p>
         <p>スマホ：画面下の5レーンをタップ</p>
       </section>
 
@@ -97,6 +118,8 @@
         <span>SCORE</span>
         <strong id="resultScore">000000</strong>
     </div>
+
+    <p id="resultClear" class="result-clear"></p>
 
     <div class="result-stats">
         <div class="result-stat">

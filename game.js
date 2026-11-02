@@ -216,10 +216,52 @@ volumeSlider.addEventListener("input", () => {
   volumeValue.textContent = `${volumeSlider.value}%`;
 });
 
+// ===== GROOVE GAUGE・パネル表示 =====
+const gaugeStart = 22;       // 開始時のゲージ（%）
+const gaugeClear = 80;       // クリアライン（%）
+const gaugeTotal = 260;      // 1曲を全部PERFECTで取ったときに増える量の目安
+const gaugeMissDamage = 3;   // MISS 1回で減る量（%）
+let gauge = gaugeStart;
+
+const gaugeBar = document.getElementById("gaugeBar");
+const gaugeValue = document.getElementById("gaugeValue");
+const panelScore = document.getElementById("panelScore");
+const panelMaxCombo = document.getElementById("panelMaxCombo");
+const resultClear = document.getElementById("resultClear");
+
+/* ゲージの見た目を更新（表示は2%刻み） */
+function updateGauge() {
+  const shown = Math.floor(gauge / 2) * 2;
+  gaugeBar.style.setProperty("--gauge", `${shown}%`);
+  gaugeValue.textContent = String(shown);
+  gaugeBar.classList.toggle("clear", gauge >= gaugeClear);
+}
+
+/* 判定に応じてゲージを増減 */
+function changeGauge(type) {
+  const totalNotes = selectedSong ? selectedSong.chart.length : 1;
+  const gain = gaugeTotal / totalNotes;
+
+  if (type === "PERFECT") {
+    gauge += gain;
+  } else if (type === "GREAT") {
+    gauge += gain / 2;
+  } else {
+    gauge -= gaugeMissDamage;
+  }
+
+  gauge = Math.min(100, Math.max(2, gauge));
+  updateGauge();
+}
+
 /* コンボ・MISS・正確度の表示を更新 */
 function updatePlayStats() {
   comboElement.textContent = String(combo);
   missCountElement.textContent = String(missCount);
+
+  // 下のパネルのSCOREとMAX COMBO
+  panelScore.textContent = String(score).padStart(6, "0");
+  panelMaxCombo.textContent = String(maxCombo);
 
   updateAccuracy();
 }
@@ -259,6 +301,10 @@ function resetStats() {
 
   scoreElement.textContent = "000000";
   updatePlayStats();
+
+  // ゲージを開始値に戻す
+  gauge = gaugeStart;
+  updateGauge();
 }
 
 // 曲選択画面を生成
@@ -454,6 +500,7 @@ function updateGame() {
       updatePlayStats();
       statusElement.textContent = "MISS";
       showJudgment("MISS");
+      changeGauge("MISS");
     }
   }
 
@@ -499,6 +546,13 @@ function finishGame() {
   resultGreat.textContent = String(greatCount);
   resultMissCount.textContent = String(missCount);
 
+  // ゲージがクリアライン以上ならCLEAR
+  const cleared = gauge >= gaugeClear;
+  resultClear.textContent = cleared ? "CLEAR" : "FAILED";
+  resultClear.className = cleared
+    ? "result-clear is-clear"
+    : "result-clear is-failed";
+
   gameScreen.hidden = true;
   resultScreen.hidden = false;
 }
@@ -541,12 +595,14 @@ function hitLane(laneIndex) {
 
       statusElement.textContent = "PERFECT!";
       showJudgment("PERFECT");
+      changeGauge("PERFECT");
     } else {
       greatCount++;
       score += 500;
 
       statusElement.textContent = "GREAT!";
       showJudgment("GREAT");
+      changeGauge("GREAT");
     }
 
     // スコアとコンボの表示を更新
