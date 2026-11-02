@@ -13,8 +13,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at top, #202b45 0%, #10131b 65%);
+  background: radial-gradient(ellipse at top, #202b45 0%, #10131b 65%);
 }
 
 button {
@@ -91,7 +90,7 @@ h1 {
   position: absolute;
   inset: 0 0 66px;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .lane {
@@ -158,7 +157,7 @@ h1 {
   right: 0;
   height: 66px;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   background: #080a10;
 }
 
@@ -206,22 +205,6 @@ h1 {
   color: #aab5ce;
   font-size: 12px;
 }
-
-@media (max-width: 420px) {
-  .game {
-    padding: 14px 8px 20px;
-  }
-
-  .playfield {
-    height: 58vh;
-    min-height: 340px;
-  }
-
-  .lane-key {
-    font-size: 12px;
-  }
-}
-
 
 /* 画面切り替え */
 .screen[hidden] {
@@ -299,17 +282,6 @@ h1 {
   margin-left: 8px;
 }
 
-@media (max-width: 480px) {
-  .song-card {
-    padding: 15px;
-  }
-
-  #backButton {
-    margin: 8px 0 0;
-  }
-}
-
-
 /* コンボ・ミス表示 */
 .game-info strong {
   color: #ffffff;
@@ -385,7 +357,6 @@ h1 {
   color: #fca5a5;
 }
 
-
 /* 判定表示の基本設定 */
 .judgment-popup {
   position: absolute;
@@ -446,3 +417,26 @@ h1 {
   }
 }
 
+/* スマートフォン向け */
+@media (max-width: 480px) {
+  .game {
+    padding: 14px 8px 20px;
+  }
+
+  .playfield {
+    height: 58vh;
+    min-height: 340px;
+  }
+
+  .lane-key {
+    font-size: 12px;
+  }
+
+  .song-card {
+    padding: 15px;
+  }
+
+  #backButton {
+    margin: 8px 0 0;
+  }
+}

@@ -1,10 +1,10 @@
-
-const laneCount = 7;
+const laneCount = 5;
 const travelTime = 1.8; // ノーツが降ってくる時間（秒）
 const hitWindow = 0.18; // 判定の許容時間（秒）
 
-const keyMap = ["d", "f", "g", " ", "j", "k", "l"];
-const laneNames = ["D", "F", "G", "SP", "J", "K", "L"];
+// 左から Space、H、J、K、L
+const keyMap = [" ", "h", "j", "k", "l"];
+const laneNames = ["SP", "H", "J", "K", "L"];
 
 // 曲ごとの譜面データ
 const songs = [
@@ -14,103 +14,110 @@ const songs = [
     audio: "assets/Break_Through_Myself_feat.RisaYuzuki.m4a",
     difficulty: "NORMAL",
     chart: [
-  { time: 2.0, lane: 3 },
-  { time: 2.5, lane: 2 },
-  { time: 3.0, lane: 4 },
-  { time: 3.5, lane: 1 },
-  { time: 4.0, lane: 5 },
-  { time: 4.5, lane: 0 },
-  { time: 5.0, lane: 6 },
-  { time: 5.5, lane: 3 },
+      { time: 2.0, lane: 3 },
+      { time: 2.5, lane: 2 },
+      { time: 3.0, lane: 4 },
+      { time: 3.5, lane: 1 },
+      { time: 4.0, lane: 5 },
+      { time: 4.5, lane: 0 },
+      { time: 5.0, lane: 6 },
+      { time: 5.5, lane: 3 },
 
-  // 交互に押す配置
-  { time: 6.0, lane: 1 },
-  { time: 6.0, lane: 5 },
-  { time: 6.3, lane: 2 },
-  { time: 6.6, lane: 4 },
-  { time: 6.9, lane: 0 },
-  { time: 7.2, lane: 6 },
-  { time: 7.5, lane: 1 },
-  { time: 7.8, lane: 5 },
+      // 交互に押す配置
+      { time: 6.0, lane: 1 },
+      { time: 6.0, lane: 5 },
+      { time: 6.3, lane: 2 },
+      { time: 6.6, lane: 4 },
+      { time: 6.9, lane: 0 },
+      { time: 7.2, lane: 6 },
+      { time: 7.5, lane: 1 },
+      { time: 7.8, lane: 5 },
 
-  // 中央レーンを含む配置
-  { time: 8.1, lane: 3 },
-  { time: 8.4, lane: 2 },
-  { time: 8.7, lane: 3 },
-  { time: 9.0, lane: 4 },
-  { time: 9.3, lane: 3 },
-  { time: 9.6, lane: 1 },
-  { time: 9.9, lane: 3 },
-  { time: 10.2, lane: 5 },
+      // 中央レーンを含む配置
+      { time: 8.1, lane: 3 },
+      { time: 8.4, lane: 2 },
+      { time: 8.7, lane: 3 },
+      { time: 9.0, lane: 4 },
+      { time: 9.3, lane: 3 },
+      { time: 9.6, lane: 1 },
+      { time: 9.9, lane: 3 },
+      { time: 10.2, lane: 5 },
 
-  // 2レーン同時押し
-  { time: 10.5, lane: 0 },
-  { time: 10.5, lane: 6 },
-  { time: 11.0, lane: 1 },
-  { time: 11.0, lane: 5 },
-  { time: 11.5, lane: 2 },
-  { time: 11.5, lane: 4 },
-  { time: 12.0, lane: 3 },
-  { time: 12.5, lane: 0 },
+      // 2レーン同時押し
+      { time: 10.5, lane: 0 },
+      { time: 10.5, lane: 6 },
+      { time: 11.0, lane: 1 },
+      { time: 11.0, lane: 5 },
+      { time: 11.5, lane: 2 },
+      { time: 11.5, lane: 4 },
+      { time: 12.0, lane: 3 },
+      { time: 12.5, lane: 0 },
 
-  // 短い間隔の連打
-  { time: 12.8, lane: 1 },
-  { time: 13.1, lane: 2 },
-  { time: 13.4, lane: 3 },
-  { time: 13.7, lane: 4 },
-  { time: 14.0, lane: 5 },
-  { time: 14.3, lane: 6 },
-  { time: 14.6, lane: 5 },
-  { time: 14.9, lane: 4 },
+      // 短い間隔の連打
+      { time: 12.8, lane: 1 },
+      { time: 13.1, lane: 2 },
+      { time: 13.4, lane: 3 },
+      { time: 13.7, lane: 4 },
+      { time: 14.0, lane: 5 },
+      { time: 14.3, lane: 6 },
+      { time: 14.6, lane: 5 },
+      { time: 14.9, lane: 4 },
 
-  // 左右を行き来する配置
-  { time: 15.2, lane: 0 },
-  { time: 15.5, lane: 6 },
-  { time: 15.8, lane: 1 },
-  { time: 16.1, lane: 5 },
-  { time: 16.4, lane: 2 },
-  { time: 16.7, lane: 4 },
-  { time: 17.0, lane: 3 },
-  { time: 17.3, lane: 0 },
+      // 左右を行き来する配置
+      { time: 15.2, lane: 0 },
+      { time: 15.5, lane: 6 },
+      { time: 15.8, lane: 1 },
+      { time: 16.1, lane: 5 },
+      { time: 16.4, lane: 2 },
+      { time: 16.7, lane: 4 },
+      { time: 17.0, lane: 3 },
+      { time: 17.3, lane: 0 },
 
-  // 同時押しと単押しの組み合わせ
-  { time: 17.6, lane: 1 },
-  { time: 17.6, lane: 3 },
-  { time: 17.9, lane: 5 },
-  { time: 18.2, lane: 2 },
-  { time: 18.2, lane: 4 },
-  { time: 18.5, lane: 6 },
-  { time: 18.8, lane: 3 },
-  { time: 19.1, lane: 1 },
+      // 同時押しと単押しの組み合わせ
+      { time: 17.6, lane: 1 },
+      { time: 17.6, lane: 3 },
+      { time: 17.9, lane: 5 },
+      { time: 18.2, lane: 2 },
+      { time: 18.2, lane: 4 },
+      { time: 18.5, lane: 6 },
+      { time: 18.8, lane: 3 },
+      { time: 19.1, lane: 1 },
 
-  // 後半の連打
-  { time: 19.4, lane: 5 },
-  { time: 19.7, lane: 4 },
-  { time: 20.0, lane: 3 },
-  { time: 20.3, lane: 2 },
-  { time: 20.6, lane: 1 },
-  { time: 20.9, lane: 0 },
-  { time: 21.2, lane: 6 },
-  { time: 21.5, lane: 3 },
+      // 後半の連打
+      { time: 19.4, lane: 5 },
+      { time: 19.7, lane: 4 },
+      { time: 20.0, lane: 3 },
+      { time: 20.3, lane: 2 },
+      { time: 20.6, lane: 1 },
+      { time: 20.9, lane: 0 },
+      { time: 21.2, lane: 6 },
+      { time: 21.5, lane: 3 },
 
-  { time: 22.0, lane: 0 },
-  { time: 22.0, lane: 3 },
-  { time: 22.5, lane: 2 },
-  { time: 22.5, lane: 5 },
-  { time: 23.0, lane: 1 },
-  { time: 23.0, lane: 4 },
-  { time: 23.5, lane: 3 },
-  { time: 24.0, lane: 6 },
+      { time: 22.0, lane: 0 },
+      { time: 22.0, lane: 3 },
+      { time: 22.5, lane: 2 },
+      { time: 22.5, lane: 5 },
+      { time: 23.0, lane: 1 },
+      { time: 23.0, lane: 4 },
+      { time: 23.5, lane: 3 },
+      { time: 24.0, lane: 6 },
     ],
-    
- },
+  },
 ];
 
-/* BPM 200を基準に、曲の後半へノーツを追加 */
+// 既存の7レーン譜面を5レーンに変換
+// 元のレーン番号0～6を、新しいレーン番号0～4に変換する
+songs.forEach((song) => {
+  song.chart.forEach((note) => {
+    note.lane = Math.round(note.lane * 4 / 6);
+  });
+});
+
+// BPM 200を基準に、曲の後半へノーツを追加
 const beatInterval = 60 / 200;
 
-// 7レーンを順番に移動する基本パターン
-const lanePattern = [3, 2, 4, 1, 5, 0, 6, 3, 1, 5, 2, 4];
+// 5レーンを順番に移動する基本パターン
+const lanePattern = [2, 1, 3, 0, 4, 2, 1, 3, 4, 0];
 
 songs.forEach((song) => {
   // 既存譜面の最後のノーツ時刻を取得
@@ -130,7 +137,7 @@ songs.forEach((song) => {
 
     // 4拍ごとに同時押しを追加
     if (beat % 4 === 0) {
-      const secondLane = (lane + 3) % 7;
+      const secondLane = (lane + 3) % 5;
       song.chart.push({ time, lane: secondLane });
     }
   }
@@ -138,7 +145,7 @@ songs.forEach((song) => {
   // 時刻順に並べ直す
   song.chart.sort((a, b) => a.time - b.time);
 });
-    
+
 // HTML要素
 const songSelectScreen = document.getElementById("songSelectScreen");
 const gameScreen = document.getElementById("gameScreen");
@@ -180,12 +187,12 @@ let lanes = [];
 let labels = [];
 let notes = [];
 
-let score = 0;          // 現在のスコア
-let combo = 0;          // 現在のコンボ数
-let maxCombo = 0;       // 最大コンボ数
-let perfectCount = 0;   // PERFECTの回数
-let greatCount = 0;     // GREATの回数
-let missCount = 0;      // MISSの回数
+let score = 0;        // 現在のスコア
+let combo = 0;        // 現在のコンボ数
+let maxCombo = 0;     // 最大コンボ数
+let perfectCount = 0; // PERFECTの回数
+let greatCount = 0;   // GREATの回数
+let missCount = 0;    // MISSの回数
 
 let running = false;
 let animationId = null;
@@ -208,7 +215,6 @@ volumeSlider.addEventListener("input", () => {
   volumeValue.textContent = `${volumeSlider.value}%`;
 });
 
-
 /* コンボ・MISS・正確度の表示を更新 */
 function updatePlayStats() {
   comboElement.textContent = String(combo);
@@ -216,7 +222,6 @@ function updatePlayStats() {
 
   updateAccuracy();
 }
-
 
 /* プレイ中の正確度を更新 */
 function updateAccuracy() {
@@ -228,7 +233,6 @@ function updateAccuracy() {
 
   playAccuracy.textContent = `${accuracy.toFixed(2)}%`;
 }
-
 
 /* PERFECT・GREAT・MISSの判定演出を表示 */
 function showJudgment(type) {
@@ -242,7 +246,6 @@ function showJudgment(type) {
   judgmentPopup.classList.add(`judgment-${type.toLowerCase()}`);
   judgmentPopup.classList.add("show");
 }
-
 
 // プレイ開始時にスコアと判定をリセット
 function resetStats() {
@@ -275,7 +278,7 @@ function createSongList() {
 
     const detail = document.createElement("span");
     detail.className = "song-card-detail";
-    detail.textContent = `${song.difficulty} · 7 KEYS`;
+    detail.textContent = `${song.difficulty} · 5 KEYS`;
 
     const playIcon = document.createElement("span");
     playIcon.className = "song-card-play";
@@ -313,7 +316,7 @@ function selectSong(song) {
   createNotes();
 }
 
-// 7つのレーンと操作用キー表示を作る
+// 5つのレーンと操作用キー表示を作る
 for (let i = 0; i < laneCount; i++) {
   const lane = document.createElement("button");
   lane.type = "button";
@@ -479,9 +482,11 @@ function finishGame() {
   resultSongTitle.textContent = selectedSong.title;
   resultScore.textContent = String(score).padStart(6, "0");
   resultMaxCombo.textContent = String(maxCombo);
-  
-  // スコアから正確度を計算（PERFECT=100%、GREAT=50%、MISS=0%）
+
+  // スコアから正確度を計算
+  // PERFECT=100%、GREAT=50%、MISS=0%
   const totalNotes = selectedSong.chart.length;
+
   const accuracy = totalNotes > 0
     ? (score / (totalNotes * 1000)) * 100
     : 0;
@@ -532,11 +537,13 @@ function hitLane(laneIndex) {
     if (nearestDifference <= 0.08) {
       perfectCount++;
       score += 1000;
+
       statusElement.textContent = "PERFECT!";
       showJudgment("PERFECT");
     } else {
       greatCount++;
       score += 500;
+
       statusElement.textContent = "GREAT!";
       showJudgment("GREAT");
     }
@@ -592,21 +599,26 @@ document.addEventListener("keydown", (event) => {
   let laneIndex;
 
   if (event.code === "Space") {
-    laneIndex = 3;
+    // Spaceキーは一番左のレーン
+    laneIndex = 0;
     event.preventDefault();
   } else {
     laneIndex = keyMap.indexOf(event.key.toLowerCase());
   }
 
-  if (laneIndex >= 0) hitLane(laneIndex);
+  if (laneIndex >= 0) {
+    hitLane(laneIndex);
+  }
 });
 
 document.addEventListener("keyup", (event) => {
   const laneIndex = event.code === "Space"
-    ? 3
+    ? 0
     : keyMap.indexOf(event.key.toLowerCase());
 
-  if (laneIndex >= 0) releaseLane(laneIndex);
+  if (laneIndex >= 0) {
+    releaseLane(laneIndex);
+  }
 });
 
 // ウィンドウからフォーカスが外れたら押下表示を解除
