@@ -496,8 +496,148 @@ h1 {
   box-shadow: 0 0 0 2px #8ceaff, 0 0 12px #65dfff;
 }
 
+/* =========================================
+   IIDX風 キー・レーンデザイン（追加分のみ）
+   ========================================= */
+
+/* ---- キー部分の台座 ---- */
+.lane-labels {
+  background: linear-gradient(180deg, #2a2f3a, #14171e);
+}
+
+.lane-labels .lane-key {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 13px;
+}
+
+/* ---- H J K L のボタン本体 ---- */
+.lane-labels .lane-key:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 7px 9px 9px;
+  border-radius: 4px;
+  transition: background 0.05s, box-shadow 0.05s;
+}
+
+/* 白鍵（H・K） */
+.lane-labels .lane-key:nth-child(2),
+.lane-labels .lane-key:nth-child(4) {
+  color: #1a1f2a;
+}
+
+.lane-labels .lane-key:nth-child(2)::before,
+.lane-labels .lane-key:nth-child(4)::before {
+  background: linear-gradient(180deg, #ffffff, #c9ced8 70%, #9aa1ae);
+  box-shadow: inset 0 -3px 0 #7d8492, 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* 黒鍵（J・L） */
+.lane-labels .lane-key:nth-child(3),
+.lane-labels .lane-key:nth-child(5) {
+  color: #e8ecf5;
+}
+
+.lane-labels .lane-key:nth-child(3)::before,
+.lane-labels .lane-key:nth-child(5)::before {
+  background: linear-gradient(180deg, #3a3f4a, #15181f 70%, #0b0d12);
+  box-shadow: inset 0 0 0 1px #5a6170, inset 0 -3px 0 #000, 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* 押したとき（H J K L） */
+.lane-labels .lane-key.pressed {
+  background: transparent;
+  color: #06121c;
+}
+
+.lane-labels .lane-key:not(:first-child).pressed::before {
+  background: linear-gradient(180deg, #ffffff, #8ceaff);
+  box-shadow: 0 0 14px #65dfff, inset 0 0 0 1px #ffffff;
+  transform: translateY(1px);
+}
+
+/* ---- ターンテーブル（Space） ---- */
+.lane-labels .lane-key:first-child {
+  background: linear-gradient(180deg, #232836, #0f1218);
+  box-shadow: inset 0 0 0 1px #3b4458;
+  color: #ffffff;
+  font-size: 9px;
+}
+
+.lane-labels .lane-key:first-child::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(52px, 78%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle, #2f6bff 0 24%, #0d1a4a 25% 27%, transparent 28%),
+    conic-gradient(from 0deg, #ffffffcc 0 4deg, transparent 4deg 360deg),
+    repeating-radial-gradient(circle, #15181f 0 2px, #22262f 2px 3px);
+  box-shadow:
+    0 0 0 3px #b9c0cc,
+    0 0 0 5px #5d6472,
+    0 3px 8px rgba(0, 0, 0, 0.7);
+}
+
+.lane-labels .lane-key:first-child.pressed {
+  background: linear-gradient(180deg, #24405a, #0f1218);
+  color: #ffffff;
+}
+
+.lane-labels .lane-key:first-child.pressed::after {
+  animation: sp-spin 0.35s linear infinite;
+  box-shadow:
+    0 0 0 3px #8ceaff,
+    0 0 0 5px #3c8fb0,
+    0 0 14px #65dfff;
+}
+
 @keyframes sp-spin {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ---- レーン背景の色分け ---- */
+.lane:nth-child(1) {
+  background: linear-gradient(#1c1418, #120d10);
+}
+
+.lane:nth-child(2),
+.lane:nth-child(4) {
+  background: linear-gradient(#1a1e27, #14171e);
+}
+
+.lane:nth-child(3),
+.lane:nth-child(5) {
+  background: linear-gradient(#0c0e13, #08090d);
+}
+
+.lane.active {
+  background: #344b70;
+}
+
+/* ---- ノーツの色分け（スクラッチ赤・白鍵白・黒鍵青） ---- */
+.lane:nth-child(1) .note {
+  background: linear-gradient(180deg, #ffb3b3, #ff4d5e);
+  box-shadow: 0 0 12px #ff4d5e88;
+}
+
+.lane:nth-child(2) .note,
+.lane:nth-child(4) .note {
+  background: linear-gradient(180deg, #ffffff, #cfd6e4);
+  box-shadow: 0 0 10px #ffffff66;
+}
+
+.lane-labels .lane-key:first-child::before {
+  display: none;
 }
 
