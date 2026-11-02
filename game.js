@@ -2,9 +2,10 @@ const laneCount = 5;
 const travelTime = 1.8; // ノーツが降ってくる時間（秒）
 const hitWindow = 0.18; // 判定の許容時間（秒）
 
-// 左から Space、H、J、K、L
-const keyMap = [" ", "h", "j", "k", "l"];
-const laneNames = ["SP", "H", "J", "K", "L"];
+// 左から G、H、J、K、L
+const keyMap = ["g", "h", "j", "k", "l"];
+const keyCodes = ["KeyG", "KeyH", "KeyJ", "KeyK", "KeyL"];
+const laneNames = ["G", "H", "J", "K", "L"];
 
 // 曲ごとの譜面データ
 const songs = [
@@ -596,29 +597,16 @@ function backToSongSelect() {
 document.addEventListener("keydown", (event) => {
   if (event.repeat) return;
 
-  let laneIndex;
-
-  if (event.code === "Space") {
-    // Spaceキーは一番左のレーン
-    laneIndex = 0;
-    event.preventDefault();
-  } else {
-    laneIndex = keyMap.indexOf(event.key.toLowerCase());
-  }
-
+  const laneIndex = keyCodes.indexOf(event.code);
   if (laneIndex >= 0) {
+    event.preventDefault();
     hitLane(laneIndex);
   }
 });
 
 document.addEventListener("keyup", (event) => {
-  const laneIndex = event.code === "Space"
-    ? 0
-    : keyMap.indexOf(event.key.toLowerCase());
-
-  if (laneIndex >= 0) {
-    releaseLane(laneIndex);
-  }
+  const laneIndex = keyCodes.indexOf(event.code);
+  if (laneIndex >= 0) releaseLane(laneIndex);
 });
 
 // ウィンドウからフォーカスが外れたら押下表示を解除
