@@ -440,3 +440,64 @@ h1 {
     margin: 8px 0 0;
   }
 }
+
+/* =========================================
+   Space キー：盾型ボックス＋ターンテーブル
+   （追加分のみ。既存ルールは変更しない）
+   ========================================= */
+.lane-labels .lane-key:first-child {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  border-radius: 0;
+  background: #4a5875; /* 盾の枠線の色 */
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+  color: #0b1220;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+/* 盾の内側（枠線1pxを残して塗る） */
+.lane-labels .lane-key:first-child::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -2;
+  background: linear-gradient(180deg, #1c2438, #0e1320);
+  clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+}
+
+/* ターンテーブル（円形のまま盾の中に収める） */
+.lane-labels .lane-key:first-child::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: min(46px, 62%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle, #dfe7f5 0 26%, #11151e 27% 31%, transparent 32%),
+    conic-gradient(from 0deg, #ffffff99 0 5deg, transparent 5deg 360deg),
+    repeating-radial-gradient(circle, #1d212b 0 2px, #2a2f3b 2px 3px);
+  box-shadow: 0 0 0 2px #5d6a85, 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* 押している間：枠が光り、円盤が回る */
+.lane-labels .lane-key:first-child.pressed {
+  background: #8ceaff;
+  color: #0b1220;
+}
+
+.lane-labels .lane-key:first-child.pressed::after {
+  animation: sp-spin 0.35s linear infinite;
+  box-shadow: 0 0 0 2px #8ceaff, 0 0 12px #65dfff;
+}
+
+@keyframes sp-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
