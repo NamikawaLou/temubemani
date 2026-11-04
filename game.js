@@ -161,6 +161,10 @@ const judgmentPopup = document.getElementById("judgmentPopup");
 const startButton = document.getElementById("startButton");
 const backButton = document.getElementById("backButton");
 
+// 判定ラインのフラッシュ演出
+const hitFlashElement = document.getElementById("hitFlash");
+let flashCells = [];
+
 // プレイ中のコンボ・MISS表示
 const comboElement = document.getElementById("combo");
 const missCountElement = document.getElementById("missCount");
@@ -387,6 +391,12 @@ for (let i = 0; i < laneCount; i++) {
   label.textContent = laneNames[i];
   labelsElement.appendChild(label);
   labels.push(label);
+
+  // レーンごとのフラッシュ表示枠
+  const flash = document.createElement("div");
+  flash.className = "flash-cell";
+  hitFlashElement.appendChild(flash);
+  flashCells.push(flash);
 }
 
 // 選択した曲の譜面からノーツを作る
@@ -557,6 +567,17 @@ function finishGame() {
   resultScreen.hidden = false;
 }
 
+/* ノーツを取ったときのフラッシュ演出 */
+function showHitFlash(laneIndex, type) {
+  const cell = flashCells[laneIndex];
+
+  // 連続で取ってもアニメーションを最初から再生する
+  cell.classList.remove("flash-perfect", "flash-great");
+  void cell.offsetWidth;
+
+  cell.classList.add(type === "PERFECT" ? "flash-perfect" : "flash-great");
+}
+
 /* 指定レーンを押したときの判定 */
 function hitLane(laneIndex) {
   labels[laneIndex].classList.add("pressed");
@@ -596,6 +617,7 @@ function hitLane(laneIndex) {
       statusElement.textContent = "PERFECT!";
       showJudgment("PERFECT");
       changeGauge("PERFECT");
+      showHitFlash(laneIndex, "PERFECT");
     } else {
       greatCount++;
       score += 500;
@@ -603,6 +625,7 @@ function hitLane(laneIndex) {
       statusElement.textContent = "GREAT!";
       showJudgment("GREAT");
       changeGauge("GREAT");
+      showHitFlash(laneIndex, "GREAT");
     }
 
     // スコアとコンボの表示を更新

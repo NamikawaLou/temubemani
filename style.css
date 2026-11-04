@@ -778,3 +778,144 @@ h1 {
   .gauge-value,
   .digital-box strong { font-size: 18px; }
 }
+
+/* =========================================
+   判定ラインのフラッシュ演出（追加分のみ）
+   ========================================= */
+
+/* ---- レーンごとの光の色 ---- */
+.lane:nth-child(1) { --beam: 255, 90, 110; }   /* G：赤 */
+.lane:nth-child(2),
+.lane:nth-child(4) { --beam: 220, 240, 255; }  /* H・K：白 */
+.lane:nth-child(3),
+.lane:nth-child(5) { --beam: 90, 190, 255; }   /* J・L：青 */
+
+/* ---- 押している間のレーンビーム ---- */
+/* 押したときの単色の背景をやめて、元のレーン色に戻す */
+.lane.active:nth-child(1) {
+  background: linear-gradient(#1c1418, #120d10);
+}
+
+.lane.active:nth-child(2),
+.lane.active:nth-child(4) {
+  background: linear-gradient(#1a1e27, #14171e);
+}
+
+.lane.active:nth-child(3),
+.lane.active:nth-child(5) {
+  background: linear-gradient(#0c0e13, #08090d);
+}
+
+/* 判定ラインから上に伸びる光 */
+.lane::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 65%;
+  background: linear-gradient(
+    to top,
+    rgba(var(--beam), 1),
+    rgba(var(--beam), 0.45) 45%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+  pointer-events: none;
+}
+
+.lane.active::before {
+  opacity: 1;
+  transition: none;
+}
+
+/* ---- ノーツを取ったときのフラッシュ ---- */
+.hit-flash {
+  top: 0;
+  height: auto;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: none;
+}
+
+.flash-cell {
+  position: relative;
+}
+
+.flash-cell:nth-child(1) { --flash: 255, 90, 110; }
+.flash-cell:nth-child(2),
+.flash-cell:nth-child(4) { --flash: 200, 230, 255; }
+.flash-cell:nth-child(3),
+.flash-cell:nth-child(5) { --flash: 90, 190, 255; }
+
+/* 判定ライン上の丸い光 */
+.flash-cell::before {
+  content: "";
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -30px;
+  height: 90px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.95) 0 12%,
+    rgba(var(--flash), 0.75) 28%,
+    transparent 62%
+  );
+  opacity: 0;
+}
+
+/* 上に伸びる光の柱 */
+.flash-cell::after {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 0;
+  height: 55%;
+  background: linear-gradient(
+    to top,
+    rgba(255, 255, 255, 0.9),
+    rgba(var(--flash), 0.45) 30%,
+    transparent
+  );
+  opacity: 0;
+  transform-origin: bottom center;
+}
+
+.flash-cell.flash-perfect::before,
+.flash-cell.flash-great::before {
+  animation: flash-burst 0.28s ease-out;
+}
+
+.flash-cell.flash-perfect::after,
+.flash-cell.flash-great::after {
+  animation: flash-column 0.22s ease-out;
+}
+
+/* GREATは少し控えめに */
+.flash-cell.flash-great::before,
+.flash-cell.flash-great::after {
+  filter: saturate(0.6) brightness(0.8);
+}
+
+@keyframes flash-burst {
+  0%   { opacity: 1; transform: scale(0.6); }
+  100% { opacity: 0; transform: scale(1.25); }
+}
+
+@keyframes flash-column {
+  0%   { opacity: 1; transform: scaleY(1); }
+  100% { opacity: 0; transform: scaleY(0.3); }
+}
+
+/* 動きを減らす設定の人には短く控えめに */
+@media (prefers-reduced-motion: reduce) {
+  .flash-cell.flash-perfect::before,
+  .flash-cell.flash-great::before,
+  .flash-cell.flash-perfect::after,
+  .flash-cell.flash-great::after {
+    animation-duration: 0.12s;
+  }
+}
