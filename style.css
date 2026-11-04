@@ -1006,3 +1006,15 @@ body::after {
   position: relative;
   z-index: 1;
 }
+
+/* =========================================
+   背景の疑似3D立方体（追加分のみ）
+   ========================================= */
+.cube-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

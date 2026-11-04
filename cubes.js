@@ -4,8 +4,9 @@
 // spectrum.js の後に読み込む
 // =========================================
 
-const cubeCount = 12;      // 立方体の数
-const cubeSize = 110;      // 立方体の大きさ（一辺の半分の長さ）
+const cubeCount = 18;      // 立方体の数
+const cubeSizeMin = 40;    // 立方体の大きさの最小値（一辺の半分の長さ）
+const cubeSizeMax = 220;   // 立方体の大きさの最大値
 const cubeSpeed = 1;       // 手前に近づいてくる速さ（0で止まる）
 const cubeOpacity = 1;     // 全体の濃さ（0〜1）
 
@@ -56,7 +57,8 @@ function createCube(z) {
     x: (Math.random() * 2 - 1) * spreadX,
     y: (Math.random() * 2 - 1) * spreadY,
     z,
-    size: cubeSize * (0.6 + Math.random() * 0.8),
+    // 最小〜最大の間でランダム（小さいものが多めに出るようにしている）
+    size: cubeSizeMin + (cubeSizeMax - cubeSizeMin) * Math.pow(Math.random(), 1.5),
     rotX: Math.random() * Math.PI * 2,
     rotY: Math.random() * Math.PI * 2,
     rotZ: Math.random() * Math.PI * 2,
