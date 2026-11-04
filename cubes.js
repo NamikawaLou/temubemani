@@ -4,11 +4,13 @@
 // spectrum.js の後に読み込む
 // =========================================
 
-const cubeCount = 18;      // 立方体の数
+const cubeCount = 12;      // 立方体の数
 const cubeSizeMin = 40;    // 立方体の大きさの最小値（一辺の半分の長さ）
 const cubeSizeMax = 220;   // 立方体の大きさの最大値
 const cubeSpeed = 1;       // 手前に近づいてくる速さ（0で止まる）
 const cubeOpacity = 1;     // 全体の濃さ（0〜1）
+const cubeHueMin = 260;    // 色の範囲（260：青紫 〜 310：赤紫）
+const cubeHueMax = 310;
 
 const cubeNear = 700;      // これより手前に来たら奥に戻す
 const cubeFar = 3200;      // 一番奥の距離
@@ -65,7 +67,7 @@ function createCube(z) {
     spinX: (Math.random() - 0.5) * 0.8,
     spinY: (Math.random() - 0.5) * 0.8,
     spinZ: (Math.random() - 0.5) * 0.4,
-    hue: 190 + Math.random() * 100, // 水色〜紫
+    hue: cubeHueMin + Math.random() * (cubeHueMax - cubeHueMin), // 紫系
   };
 }
 
