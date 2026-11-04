@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>譜面自動作成ツール</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Segoe UI", "Yu Gothic UI", sans-serif;
+      background: #0b0712;
+      color: #f3eefc;
+    }
+    body { margin: 0; }
+    main { width: min(100% - 32px, 760px); margin: 32px auto; }
+    h1 { font-size: 1.6rem; margin: 0 0 4px; letter-spacing: 0.04em; }
+    p { line-height: 1.7; color: #c9bfdc; }
+    fieldset {
+      margin: 0 0 18px;
+      padding: 16px 18px;
+      border: 1px solid #3a2a55;
+      border-radius: 10px;
+      background: #140d20;
+    }
+    legend { padding: 0 6px; color: #c9a8ff; font-weight: 700; }
+    label { display: block; margin: 10px 0 4px; font-size: 0.9rem; }
+    .hint { font-size: 0.8rem; color: #9d90b5; margin: 2px 0 0; }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border: 1px solid #4a3870;
+      border-radius: 6px;
+      background: #0b0712;
+      color: inherit;
+      font: inherit;
+    }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #2d2142; text-align: left; }
+    th { color: #c9a8ff; font-weight: 600; font-size: 0.85rem; }
+    button {
+      padding: 12px 22px;
+      border: 0;
+      border-radius: 8px;
+      background: #b48cff;
+      color: #12081f;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.secondary { background: #2d2142; color: #f3eefc; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    #status { margin: 12px 0; min-height: 1.5em; color: #8ceaff; }
+    progress { width: 100%; height: 10px; }
+    code { background: #2d2142; padding: 1px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>譜面自動作成ツール</h1>
+    <p>
+      曲を解析して、NORMAL・HARD・MANIAC の3難易度の譜面ファイルを作ります。
+      できたファイルをゲームの <code>charts</code> フォルダに入れると、ゲームが読み込みます。
+      解析はこのページを開いているパソコンの中だけで行われ、曲がどこかに送られることはありません。
+    </p>
+
+    <fieldset>
+      <legend>1. 曲を選ぶ</legend>
+      <label for="audioFile">音源ファイル（m4a・mp3・wav など）</label>
+      <input type="file" id="audioFile" accept="audio/*">
+
+      <label for="songId">曲ID（英小文字・数字・ハイフンのみ）</label>
+      <input type="text" id="songId" placeholder="例：break-through-myself">
+      <p class="hint">songs.js の <code>id</code> と同じにしてください。保存されるファイル名にもなります。</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>2. 解析の設定</legend>
+      <div class="row">
+        <div>
+          <label for="bpm">BPM</label>
+          <input type="number" id="bpm" min="40" max="300" step="0.01" placeholder="空欄で自動推定">
+          <p class="hint">分かっている場合は入力すると正確になります。</p>
+        </div>
+        <div>
+          <label for="offset">オフセット（秒）</label>
+          <input type="number" id="offset" min="0" max="5" step="0.001" placeholder="空欄で自動推定">
+          <p class="hint">最初の拍の位置です。通常は空欄で大丈夫です。</p>
+        </div>
+      </div>
+
+      <label>1秒あたりのノーツ数の目安（大きいほど難しくなります）</label>
+      <div class="row">
+        <div>
+          <label for="densityNormal">NORMAL</label>
+          <input type="number" id="densityNormal" min="0.5" max="15" step="0.1">
+        </div>
+        <div>
+          <label for="densityHard">HARD</label>
+          <input type="number" id="densityHard" min="0.5" max="15" step="0.1">
+        </div>
+        <div>
+          <label for="densityManiac">MANIAC</label>
+          <input type="number" id="densityManiac" min="0.5" max="15" step="0.1">
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" id="analyseButton" disabled>解析して譜面を作る</button>
+      <button type="button" id="downloadButton" class="secondary" disabled>譜面ファイルを保存</button>
+    </div>
+    <p id="status">音源ファイルを選んでください。</p>
+    <progress id="progress" value="0" max="1" hidden></progress>
+
+    <fieldset id="resultBox" hidden>
+      <legend>3. 結果</legend>
+      <p id="resultSummary"></p>
+      <table>
+        <thead>
+          <tr><th>難易度</th><th>レベル</th><th>ノーツ数</th><th>1秒あたり</th></tr>
+        </thead>
+        <tbody id="resultTable"></tbody>
+      </table>
+      <p class="hint">
+        保存したファイルを、ゲームのフォルダの <code>charts</code> の中に入れてください。
+        同じ名前のファイルがある場合は上書きします。
+      </p>
+    </fieldset>
+  </main>
+
+  <script src="chart-maker.js"></script>
+  <script>
+    const audioFileInput = document.getElementById("audioFile");
+    const songIdInput = document.getElementById("songId");
+    const bpmInput = document.getElementById("bpm");
+    const offsetInput = document.getElementById("offset");
+    const densityInputs = {
+      NORMAL: document.getElementById("densityNormal"),
+      HARD: document.getElementById("densityHard"),
+      MANIAC: document.getElementById("densityManiac"),
+    };
+    const analyseButton = document.getElementById("analyseButton");
+    const downloadButton = document.getElementById("downloadButton");
+    const statusElement = document.getElementById("status");
+    const progressElement = document.getElementById("progress");
+    const resultBox = document.getElementById("resultBox");
+    const resultSummary = document.getElementById("resultSummary");
+    const resultTable = document.getElementById("resultTable");
+
+    let lastFileText = "";
+    let lastSongId = "";
+
+    // 初期値を入れる
+    for (const [name, input] of Object.entries(densityInputs)) {
+      input.value = ChartMaker.DEFAULT_DIFFICULTIES[name].density;
+    }
+
+    // ファイル名から曲IDの候補を作る
+    audioFileInput.addEventListener("change", () => {
+      const file = audioFileInput.files[0];
+      analyseButton.disabled = !file;
+      if (!file) return;
+
+      if (!songIdInput.value) {
+        songIdInput.value = file.name
+          .replace(/\.[^.]+$/, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+      statusElement.textContent = "「解析して譜面を作る」を押してください。";
+    });
+
+    analyseButton.addEventListener("click", async () => {
+      const file = audioFileInput.files[0];
+      const songId = songIdInput.value.trim();
+
+      if (!file) return;
+      if (!/^[a-z0-9-]+$/.test(songId)) {
+        alert("曲IDは英小文字・数字・ハイフンだけで入力してください。");
+        return;
+      }
+
+      analyseButton.disabled = true;
+      downloadButton.disabled = true;
+      resultBox.hidden = true;
+      progressElement.hidden = false;
+      progressElement.value = 0;
+
+      try {
+        statusElement.textContent = "音源を読み込んでいます…";
+        const arrayBuffer = await file.arrayBuffer();
+        const context = new AudioContext();
+        const buffer = await context.decodeAudioData(arrayBuffer);
+        context.close();
+
+        // ステレオを1つにまとめる
+        const samples = new Float32Array(buffer.length);
+        for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+          const data = buffer.getChannelData(channel);
+          for (let i = 0; i < data.length; i++) samples[i] += data[i] / buffer.numberOfChannels;
+        }
+
+        statusElement.textContent = "曲を解析しています…";
+        const difficulties = {};
+        for (const [name, input] of Object.entries(densityInputs)) {
+          const value = Number(input.value);
+          if (value > 0) difficulties[name] = { density: value };
+        }
+
+        const charts = await ChartMaker.generateCharts(samples, buffer.sampleRate, {
+          songId,
+          bpm: Number(bpmInput.value) || undefined,
+          offset: offsetInput.value === "" ? undefined : Number(offsetInput.value),
+          difficulties,
+          onProgress: (ratio) => { progressElement.value = ratio; },
+        });
+
+        lastFileText = ChartMaker.toChartFile(songId, charts);
+        lastSongId = songId;
+
+        resultSummary.textContent =
+          `BPM ${charts.bpm}・オフセット ${charts.offset}秒・曲の長さ ${charts.duration}秒`;
+        resultTable.replaceChildren();
+        for (const name of ["NORMAL", "HARD", "MANIAC"]) {
+          const chart = charts[name];
+          const row = document.createElement("tr");
+          const perSecond = (chart.notes.length / Math.max(1, charts.duration - 2)).toFixed(1);
+          for (const text of [name, `Lv.${chart.level}`, chart.notes.length, perSecond]) {
+            const cell = document.createElement("td");
+            cell.textContent = text;
+            row.appendChild(cell);
+          }
+          resultTable.appendChild(row);
+        }
+
+        resultBox.hidden = false;
+        downloadButton.disabled = false;
+        statusElement.textContent = "完成しました。「譜面ファイルを保存」を押してください。";
+      } catch (error) {
+        console.error(error);
+        statusElement.textContent = "解析に失敗しました。別の形式の音源で試してください。";
+      } finally {
+        analyseButton.disabled = false;
+        progressElement.hidden = true;
+      }
+    });
+
+    // 譜面ファイルを保存
+    downloadButton.addEventListener("click", () => {
+      const blob = new Blob([lastFileText], { type: "text/javascript" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${lastSongId}.js`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    });
+  </script>
+</body>
+</html>

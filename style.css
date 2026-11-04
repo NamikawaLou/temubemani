@@ -1052,3 +1052,141 @@ body::after {
       transparent 122px 260px
     );
 }
+
+/* =========================================
+   難易度選択・チュートリアル（追加分のみ）
+   ========================================= */
+
+/* ---- 曲ごとの枠 ---- */
+.song-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+}
+
+.song-entry-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.song-entry-warning {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #ff9a9a;
+  font-size: 0.8rem;
+}
+
+/* ---- 難易度ボタン ---- */
+.difficulty-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.difficulty-button {
+  --difficulty: 140, 234, 255;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 84px;
+  padding: 8px 10px;
+  border: 1px solid rgba(var(--difficulty), 0.6);
+  border-radius: 8px;
+  background: rgba(var(--difficulty), 0.1);
+  color: rgb(var(--difficulty));
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.difficulty-normal { --difficulty: 120, 220, 255; }
+.difficulty-hard   { --difficulty: 255, 190, 90; }
+.difficulty-maniac { --difficulty: 255, 90, 140; }
+
+.difficulty-button:hover:not(:disabled),
+.difficulty-button:focus-visible {
+  background: rgba(var(--difficulty), 0.25);
+  box-shadow: 0 0 12px rgba(var(--difficulty), 0.45);
+  outline: none;
+}
+
+.difficulty-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.difficulty-name {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.difficulty-level {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+@media (max-width: 560px) {
+  .song-entry { grid-template-columns: 1fr; }
+  .difficulty-buttons { justify-content: stretch; }
+  .difficulty-button { flex: 1; min-width: 0; }
+}
+
+/* ---- チュートリアルの枠 ---- */
+.tutorial-card {
+  border-color: rgba(201, 168, 255, 0.6);
+  background: rgba(180, 140, 255, 0.12);
+}
+
+.tutorial-card .song-card-play {
+  color: #c9a8ff;
+}
+
+/* ---- チュートリアルのメッセージ ---- */
+.tutorial-message {
+  position: absolute;
+  z-index: 12;
+  top: 14px;
+  left: 50%;
+  width: min(90%, 520px);
+  transform: translateX(-50%);
+  padding: 12px 16px;
+  border: 1px solid rgba(201, 168, 255, 0.7);
+  border-radius: 10px;
+  background: rgba(14, 8, 26, 0.9);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  color: #f3eefc;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+  pointer-events: none;
+}
+
+.tutorial-message[hidden] {
+  display: none;
+}
+
+/* 押すキーを点滅させる */
+.lane-labels .lane-key.tutorial-target {
+  animation: tutorial-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes tutorial-pulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.7) drop-shadow(0 0 8px #c9a8ff); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lane-labels .lane-key.tutorial-target {
+    animation: none;
+    filter: brightness(1.5);
+  }
+}

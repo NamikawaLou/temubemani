@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RhythmGame - 5 Keys</title>
   <link rel="stylesheet" href="style.css">
+  <script src="songs.js" defer></script>
   <script src="game.js" defer></script>
   <script src="spectrum.js" defer></script>
   <script src="cubes.js" defer></script>
@@ -17,13 +18,13 @@
     <section id="songSelectScreen" class="screen">
       <header class="game-header">
         <div>
-          <p class="eyebrow">BROWSER RHYTHM GAME</p>
+          <p class="eyebrow">T寺</p>
           <h1>SELECT MUSIC</h1>
         </div>
       </header>
 
       <p class="screen-description">
-        プレイする曲を選択してください。
+        プレイする曲と難易度を選択してください。
       </p>
 
       <div id="songList" class="song-list">
@@ -61,6 +62,7 @@
         <div class="judgment-line"></div>
         <div class="hit-flash" id="hitFlash"></div>
         <div id="judgmentPopup" class="judgment-popup" aria-live="polite"></div>
+        <div id="tutorialMessage" class="tutorial-message" aria-live="polite" hidden></div>
         <div class="lane-labels" id="laneLabels"></div>
       </section>
 

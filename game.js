@@ -7,145 +7,110 @@ const keyMap = ["g", "h", "j", "k", "l"];
 const keyCodes = ["KeyG", "KeyH", "KeyJ", "KeyK", "KeyL"];
 const laneNames = ["G", "H", "J", "K", "L"];
 
-// 曲ごとの譜面データ
-const songs = [
-  {
-    id: "break-through-myself",
-    title: "Break Through Myself feat. Risa Yuzuki",
-    audio: "assets/Break_Through_Myself_feat.RisaYuzuki.m4a",
-    difficulty: "NORMAL",
-    chart: [
-      { time: 2.0, lane: 3 },
-      { time: 2.5, lane: 2 },
-      { time: 3.0, lane: 4 },
-      { time: 3.5, lane: 1 },
-      { time: 4.0, lane: 5 },
-      { time: 4.5, lane: 0 },
-      { time: 5.0, lane: 6 },
-      { time: 5.5, lane: 3 },
+// ===== 曲と譜面 =====
+// 曲の一覧は songs.js、譜面は charts フォルダのファイルに分けている
+// 譜面は tools/chart-maker.html で事前に作るので、ゲーム中に曲を解析する必要はない
+const difficultyNames = ["NORMAL", "HARD", "MANIAC"];
+const chartStore = {};     // 読み込んだ譜面（曲IDごと）
+const chartStatus = {};    // "loading" / "loaded" / "error"
 
-      // 交互に押す配置
-      { time: 6.0, lane: 1 },
-      { time: 6.0, lane: 5 },
-      { time: 6.3, lane: 2 },
-      { time: 6.6, lane: 4 },
-      { time: 6.9, lane: 0 },
-      { time: 7.2, lane: 6 },
-      { time: 7.5, lane: 1 },
-      { time: 7.8, lane: 5 },
+/* 譜面ファイルから呼ばれる（charts/曲ID.js の中で使う） */
+function registerChart(songId, data) {
+  chartStore[songId] = data;
+}
 
-      // 中央レーンを含む配置
-      { time: 8.1, lane: 3 },
-      { time: 8.4, lane: 2 },
-      { time: 8.7, lane: 3 },
-      { time: 9.0, lane: 4 },
-      { time: 9.3, lane: 3 },
-      { time: 9.6, lane: 1 },
-      { time: 9.9, lane: 3 },
-      { time: 10.2, lane: 5 },
+/* 譜面ファイルを読み込む（ファイルを直接開いた場合でも動くよう script タグで読み込む） */
+function loadChart(song) {
+  if (chartStatus[song.id]) return;
+  chartStatus[song.id] = "loading";
 
-      // 2レーン同時押し
-      { time: 10.5, lane: 0 },
-      { time: 10.5, lane: 6 },
-      { time: 11.0, lane: 1 },
-      { time: 11.0, lane: 5 },
-      { time: 11.5, lane: 2 },
-      { time: 11.5, lane: 4 },
-      { time: 12.0, lane: 3 },
-      { time: 12.5, lane: 0 },
+  const script = document.createElement("script");
+  script.src = song.chart;
+  script.onload = () => {
+    chartStatus[song.id] = chartStore[song.id] ? "loaded" : "error";
+    createSongList();
+  };
+  script.onerror = () => {
+    chartStatus[song.id] = "error";
+    createSongList();
+  };
+  document.head.appendChild(script);
+}
 
-      // 短い間隔の連打
-      { time: 12.8, lane: 1 },
-      { time: 13.1, lane: 2 },
-      { time: 13.4, lane: 3 },
-      { time: 13.7, lane: 4 },
-      { time: 14.0, lane: 5 },
-      { time: 14.3, lane: 6 },
-      { time: 14.6, lane: 5 },
-      { time: 14.9, lane: 4 },
+/* 譜面データ [時刻, レーン] を、ゲームで使う形 { time, lane } に変える */
+function getChartNotes(songId, difficulty) {
+  const chart = chartStore[songId] && chartStore[songId][difficulty];
+  if (!chart) return [];
+  return chart.notes
+    .map(([time, lane]) => ({ time, lane }))
+    .sort((a, b) => a.time - b.time);
+}
 
-      // 左右を行き来する配置
-      { time: 15.2, lane: 0 },
-      { time: 15.5, lane: 6 },
-      { time: 15.8, lane: 1 },
-      { time: 16.1, lane: 5 },
-      { time: 16.4, lane: 2 },
-      { time: 16.7, lane: 4 },
-      { time: 17.0, lane: 3 },
-      { time: 17.3, lane: 0 },
+// ===== チュートリアル =====
+const tutorialSong = {
+  id: "tutorial",
+  title: "TUTORIAL",
+  tutorial: true,
+  bpm: 100,
+};
 
-      // 同時押しと単押しの組み合わせ
-      { time: 17.6, lane: 1 },
-      { time: 17.6, lane: 3 },
-      { time: 17.9, lane: 5 },
-      { time: 18.2, lane: 2 },
-      { time: 18.2, lane: 4 },
-      { time: 18.5, lane: 6 },
-      { time: 18.8, lane: 3 },
-      { time: 19.1, lane: 1 },
+/* チュートリアルの流れ（メッセージとノーツ）を作る */
+function buildTutorial() {
+  const messages = [];
+  const notes = [];
+  let time = 1;
 
-      // 後半の連打
-      { time: 19.4, lane: 5 },
-      { time: 19.7, lane: 4 },
-      { time: 20.0, lane: 3 },
-      { time: 20.3, lane: 2 },
-      { time: 20.6, lane: 1 },
-      { time: 20.9, lane: 0 },
-      { time: 21.2, lane: 6 },
-      { time: 21.5, lane: 3 },
+  const say = (text, lanes = []) => messages.push({ time, text, lanes });
 
-      { time: 22.0, lane: 0 },
-      { time: 22.0, lane: 3 },
-      { time: 22.5, lane: 2 },
-      { time: 22.5, lane: 5 },
-      { time: 23.0, lane: 1 },
-      { time: 23.0, lane: 4 },
-      { time: 23.5, lane: 3 },
-      { time: 24.0, lane: 6 },
-    ],
-  },
-];
+  say("T寺へようこそ！ 上から降ってくるノーツが、下の水色の線（判定ライン）に重なった瞬間に、そのレーンのキーを押します。");
+  time += 5;
 
-// 既存の7レーン譜面を5レーンに変換
-// 元のレーン番号0～6を、新しいレーン番号0～4に変換する
-songs.forEach((song) => {
-  song.chart.forEach((note) => {
-    note.lane = Math.round(note.lane * 4 / 6);
-  });
-});
-
-// BPM 200を基準に、曲の後半へノーツを追加
-const beatInterval = 60 / 200;
-
-// 5レーンを順番に移動する基本パターン
-const lanePattern = [2, 1, 3, 0, 4, 2, 1, 3, 4, 0];
-
-songs.forEach((song) => {
-  // 既存譜面の最後のノーツ時刻を取得
-  const lastTime = Math.max(
-    ...song.chart.map((note) => note.time)
-  );
-
-  // 既存譜面の後ろから、曲の終盤まで追加する
-  const startTime = Math.ceil(lastTime / beatInterval) + 1;
-  const totalBeats = Math.floor(146 / beatInterval);
-
-  for (let beat = startTime; beat <= totalBeats; beat++) {
-    const time = Number((beat * beatInterval).toFixed(3));
-    const lane = lanePattern[beat % lanePattern.length];
-
-    song.chart.push({ time, lane });
-
-    // 4拍ごとに同時押しを追加
-    if (beat % 4 === 0) {
-      const secondLane = (lane + 3) % 5;
-      song.chart.push({ time, lane: secondLane });
-    }
+  // 1レーンずつ練習
+  const keyLabels = ["G（左端のターンテーブル）", "H", "J", "K", "L"];
+  for (let lane = 0; lane < laneCount; lane++) {
+    say(`${keyLabels[lane]} キーを押してみよう`, [lane]);
+    notes.push({ time: time + 2.6, lane }, { time: time + 3.6, lane });
+    time += 4.6;
   }
 
-  // 時刻順に並べ直す
-  song.chart.sort((a, b) => a.time - b.time);
-});
+  // 左から順番に
+  say("左から順番に G・H・J・K・L。リズムに乗って押そう", [0, 1, 2, 3, 4]);
+  for (let round = 0; round < 2; round++) {
+    for (let lane = 0; lane < laneCount; lane++) {
+      notes.push({ time: time + 2.6 + (round * laneCount + lane) * 0.6, lane });
+    }
+  }
+  time += 2.6 + laneCount * 2 * 0.6 + 1.2;
+
+  // 同時押し
+  say("横に並んだノーツは、2つのキーを同時に押そう");
+  const pairs = [[1, 3], [0, 4], [2, 4], [0, 2], [1, 3]];
+  pairs.forEach(([a, b], index) => {
+    const at = time + 2.6 + index * 1.2;
+    notes.push({ time: at, lane: a }, { time: at, lane: b });
+  });
+  time += 2.6 + pairs.length * 1.2 + 0.8;
+
+  // 連続
+  say("少し速くなるよ。続けて押してみよう");
+  const pattern = [1, 2, 3, 4, 3, 2, 1, 0, 1, 3, 2, 4];
+  pattern.forEach((lane, index) => {
+    notes.push({ time: time + 2.6 + index * 0.4, lane });
+  });
+  time += 2.6 + pattern.length * 0.4 + 1;
+
+  // まとめ
+  say("判定は PERFECT・GREAT・MISS の3種類。下のゲージを80%以上にして曲を終えるとクリアです！");
+  time += 6;
+  say("これでチュートリアルは終わりです。曲選択画面から曲と難易度を選んで遊んでみよう！");
+  time += 4;
+
+  return { messages, notes, endTime: time };
+}
+
+const tutorialData = buildTutorial();
+let tutorialStartTime = 0;
+let tutorialMessageIndex = -1;
 
 // HTML要素
 const songSelectScreen = document.getElementById("songSelectScreen");
@@ -160,6 +125,7 @@ const statusElement = document.getElementById("status");
 const judgmentPopup = document.getElementById("judgmentPopup");
 const startButton = document.getElementById("startButton");
 const backButton = document.getElementById("backButton");
+const tutorialMessage = document.getElementById("tutorialMessage");
 
 // 判定ラインのフラッシュ演出
 const hitFlashElement = document.getElementById("hitFlash");
@@ -202,6 +168,16 @@ let missCount = 0;    // MISSの回数
 let running = false;
 let animationId = null;
 let selectedSong = null;
+let selectedDifficulty = "NORMAL";
+let currentChart = [];   // プレイ中の譜面 { time, lane } の一覧
+
+/* 今の時刻（秒）。曲なら再生位置、チュートリアルなら開始からの経過時間 */
+function getTime() {
+  if (selectedSong && selectedSong.tutorial) {
+    return (performance.now() - tutorialStartTime) / 1000;
+  }
+  return audio.currentTime;
+}
 
 // 音源
 const audio = new Audio();
@@ -243,7 +219,7 @@ function updateGauge() {
 
 /* 判定に応じてゲージを増減 */
 function changeGauge(type) {
-  const totalNotes = selectedSong ? selectedSong.chart.length : 1;
+  const totalNotes = Math.max(1, currentChart.length);
   const gain = gaugeTotal / totalNotes;
 
   if (type === "PERFECT") {
@@ -272,7 +248,7 @@ function updatePlayStats() {
 
 /* プレイ中の正確度を更新 */
 function updateAccuracy() {
-  const totalNotes = selectedSong ? selectedSong.chart.length : 0;
+  const totalNotes = currentChart.length;
 
   const accuracy = totalNotes > 0
     ? (score / (totalNotes * 1000)) * 100
@@ -315,13 +291,36 @@ function resetStats() {
 function createSongList() {
   songListElement.replaceChildren();
 
-  songs.forEach((song) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "song-card";
+  // チュートリアル
+  const tutorialButton = document.createElement("button");
+  tutorialButton.type = "button";
+  tutorialButton.className = "song-card tutorial-card";
 
-    const info = document.createElement("span");
-    info.className = "song-card-info";
+  const tutorialInfo = document.createElement("span");
+  tutorialInfo.className = "song-card-info";
+  const tutorialTitle = document.createElement("span");
+  tutorialTitle.className = "song-card-title";
+  tutorialTitle.textContent = "TUTORIAL";
+  const tutorialDetail = document.createElement("span");
+  tutorialDetail.className = "song-card-detail";
+  tutorialDetail.textContent = "はじめての方はこちら · 遊び方を練習できます";
+  tutorialInfo.append(tutorialTitle, tutorialDetail);
+
+  const tutorialIcon = document.createElement("span");
+  tutorialIcon.className = "song-card-play";
+  tutorialIcon.textContent = "▶";
+
+  tutorialButton.append(tutorialInfo, tutorialIcon);
+  tutorialButton.addEventListener("click", () => selectSong(tutorialSong));
+  songListElement.appendChild(tutorialButton);
+
+  // 曲
+  songs.forEach((song) => {
+    const entry = document.createElement("div");
+    entry.className = "song-entry";
+
+    const info = document.createElement("div");
+    info.className = "song-entry-info";
 
     const title = document.createElement("span");
     title.className = "song-card-title";
@@ -329,30 +328,78 @@ function createSongList() {
 
     const detail = document.createElement("span");
     detail.className = "song-card-detail";
-    detail.textContent = `${song.difficulty} · 5 KEYS`;
-
-    const playIcon = document.createElement("span");
-    playIcon.className = "song-card-play";
-    playIcon.textContent = "▶";
+    const chart = chartStore[song.id];
+    const bpm = song.bpm || (chart && chart.bpm);
+    detail.textContent = bpm ? `BPM ${bpm} · 5 KEYS` : "5 KEYS";
 
     info.append(title, detail);
-    button.append(info, playIcon);
 
-    button.addEventListener("click", () => selectSong(song));
-    songListElement.appendChild(button);
+    const buttons = document.createElement("div");
+    buttons.className = "difficulty-buttons";
+
+    const status = chartStatus[song.id];
+
+    difficultyNames.forEach((name) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `difficulty-button difficulty-${name.toLowerCase()}`;
+
+      const label = document.createElement("span");
+      label.className = "difficulty-name";
+      label.textContent = name;
+
+      const level = document.createElement("span");
+      level.className = "difficulty-level";
+
+      const data = chart && chart[name];
+      if (data) {
+        level.textContent = `Lv.${data.level}`;
+        button.title = `${data.notes.length} ノーツ`;
+        button.addEventListener("click", () => selectSong(song, name));
+      } else {
+        level.textContent = status === "loading" ? "…" : "－";
+        button.disabled = true;
+      }
+
+      button.append(label, level);
+      buttons.appendChild(button);
+    });
+
+    entry.append(info, buttons);
+
+    if (status === "error") {
+      const warning = document.createElement("p");
+      warning.className = "song-entry-warning";
+      warning.textContent = `譜面ファイル（${song.chart}）が見つかりません。tools/chart-maker.html で作成してください。`;
+      entry.appendChild(warning);
+    }
+
+    songListElement.appendChild(entry);
   });
 }
 
-// 曲を選択してゲーム画面へ移動
-function selectSong(song) {
+// 曲（と難易度）を選択してゲーム画面へ移動
+function selectSong(song, difficulty = "NORMAL") {
   stopGame();
 
   selectedSong = song;
-  currentSongTitle.textContent = song.title;
+  selectedDifficulty = difficulty;
 
-  // 選んだ曲の音源を読み込む
-  audio.src = song.audio;
-  audio.load();
+  if (song.tutorial) {
+    currentChart = tutorialData.notes.map((note) => ({ ...note }));
+    currentSongTitle.textContent = "TUTORIAL";
+    startButton.textContent = "チュートリアル開始";
+  } else {
+    currentChart = getChartNotes(song.id, difficulty);
+    currentSongTitle.textContent = `${song.title}　[${difficulty}]`;
+    startButton.textContent = "ゲーム開始";
+
+    // 選んだ曲の音源を読み込む
+    audio.src = song.audio;
+    audio.load();
+  }
+
+  hideTutorialMessage();
 
   // 曲選択画面・ゲーム画面・リザルト画面を切り替える
   songSelectScreen.hidden = true;
@@ -361,10 +408,38 @@ function selectSong(song) {
 
   resetStats();
   statusElement.textContent = "READY";
-  startButton.textContent = "ゲーム開始";
   startButton.disabled = false;
 
   createNotes();
+}
+
+/* チュートリアルのメッセージ表示 */
+function showTutorialMessage(message) {
+  tutorialMessage.textContent = message.text;
+  tutorialMessage.hidden = false;
+
+  // 押すキーを光らせる
+  labels.forEach((label, index) => {
+    label.classList.toggle("tutorial-target", message.lanes.includes(index));
+  });
+}
+
+function hideTutorialMessage() {
+  tutorialMessageIndex = -1;
+  tutorialMessage.hidden = true;
+  labels.forEach((label) => label.classList.remove("tutorial-target"));
+}
+
+function updateTutorialMessage(elapsed) {
+  let index = -1;
+  tutorialData.messages.forEach((message, i) => {
+    if (elapsed >= message.time) index = i;
+  });
+
+  if (index !== tutorialMessageIndex && index >= 0) {
+    tutorialMessageIndex = index;
+    showTutorialMessage(tutorialData.messages[index]);
+  }
 }
 
 // 5つのレーンと操作用キー表示を作る
@@ -408,7 +483,7 @@ function createNotes() {
     return;
   }
 
-  notes = selectedSong.chart.map((item) => {
+  notes = currentChart.map((item) => {
     const element = document.createElement("div");
     element.className = "note";
     lanes[item.lane].appendChild(element);
@@ -424,7 +499,8 @@ function createNotes() {
 
 // ゲーム開始
 async function startGame() {
-  if (!selectedSong || running) return;
+  // プレイ中に押した場合は最初からやり直す
+  if (!selectedSong) return;
 
   stopGame();
   createNotes();
@@ -435,6 +511,18 @@ async function startGame() {
 
   labels.forEach((label) => label.classList.remove("pressed"));
   lanes.forEach((lane) => lane.classList.remove("active"));
+
+  // チュートリアルは音源なしで、経過時間に合わせて進める
+  if (selectedSong.tutorial) {
+    hideTutorialMessage();
+    tutorialStartTime = performance.now();
+    running = true;
+    statusElement.textContent = "TUTORIAL";
+    startButton.textContent = "最初からやり直す";
+    startButton.disabled = false;
+    animationId = requestAnimationFrame(updateGame);
+    return;
+  }
 
   try {
     // 音源の読み込みを待つ
@@ -488,7 +576,11 @@ async function startGame() {
 function updateGame() {
   if (!running) return;
 
-  const elapsed = audio.currentTime;
+  const elapsed = getTime();
+
+  if (selectedSong.tutorial) {
+    updateTutorialMessage(elapsed);
+  }
 
   for (const note of notes) {
     if (note.judged) continue;
@@ -514,8 +606,12 @@ function updateGame() {
     }
   }
 
-  // 曲の最後まで再生されたら終了
-  if (audio.ended) {
+  // 曲の最後まで再生されたら終了（チュートリアルは最後のメッセージの後）
+  const finished = selectedSong.tutorial
+    ? elapsed >= tutorialData.endTime
+    : audio.ended;
+
+  if (finished) {
     finishGame();
     return;
   }
@@ -535,15 +631,18 @@ function finishGame() {
   }
 
   audio.pause();
+  hideTutorialMessage();
 
   // 今回のプレイ結果をリザルト画面に反映
-  resultSongTitle.textContent = selectedSong.title;
+  resultSongTitle.textContent = selectedSong.tutorial
+    ? "TUTORIAL"
+    : `${selectedSong.title}　[${selectedDifficulty}]`;
   resultScore.textContent = String(score).padStart(6, "0");
   resultMaxCombo.textContent = String(maxCombo);
 
   // スコアから正確度を計算
   // PERFECT=100%、GREAT=50%、MISS=0%
-  const totalNotes = selectedSong.chart.length;
+  const totalNotes = currentChart.length;
 
   const accuracy = totalNotes > 0
     ? (score / (totalNotes * 1000)) * 100
@@ -557,8 +656,11 @@ function finishGame() {
   resultMissCount.textContent = String(missCount);
 
   // ゲージがクリアライン以上ならCLEAR
-  const cleared = gauge >= gaugeClear;
-  resultClear.textContent = cleared ? "CLEAR" : "FAILED";
+  // チュートリアルは必ずCOMPLETE
+  const cleared = selectedSong.tutorial || gauge >= gaugeClear;
+  resultClear.textContent = selectedSong.tutorial
+    ? "COMPLETE"
+    : cleared ? "CLEAR" : "FAILED";
   resultClear.className = cleared
     ? "result-clear is-clear"
     : "result-clear is-failed";
@@ -585,7 +687,7 @@ function hitLane(laneIndex) {
 
   if (!running) return;
 
-  const elapsed = audio.currentTime;
+  const elapsed = getTime();
 
   let nearestNote = null;
   let nearestDifference = Infinity;
@@ -650,6 +752,7 @@ function stopGame() {
   }
 
   audio.pause();
+  hideTutorialMessage();
 
   if (audio.src) {
     audio.currentTime = 0;
@@ -710,5 +813,6 @@ retryButton.addEventListener("click", () => {
 // リザルト画面から曲選択へ戻る
 resultBackButton.addEventListener("click", backToSongSelect);
 
-// 最初に曲一覧を表示
+// 最初に曲一覧を表示し、各曲の譜面ファイルを読み込む
 createSongList();
+songs.forEach(loadChart);
